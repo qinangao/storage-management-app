@@ -1,19 +1,33 @@
 "use server";
 
-import { ID } from "node-appwrite";
-import { createAdminClient } from "..";
+import { ID, Query } from "node-appwrite";
+import { createAdminClient, createSessionClient } from "..";
 import { appwriteConfig } from "../config";
-import { getUserByEmail, sendEmailOTP } from "../helper";
 import { parseStringify } from "../utils";
+import { cookies } from "next/headers";
+import { avatarPlaceholderUrl } from "../constants";
+import { handleError } from "../helper";
 
-// Create account flow
-// 1. User enters fullname and email
-// 2.Check if user already existusing the email
-// 3. Send OTP to user email
-// 4 This will send a secret key for creating a session
-// 5. create user document if the user is new user
-// 6.return the user accountID
-// 7 Verrify OTP and authenticate to login
+export async function getUserByEmail(email: string) {
+  const { databases } = await createAdminClient();
+  const result = await databases.listDocuments(
+    appwriteConfig.databaseId,
+    appwriteConfig.usersCollectionId,
+    [Query.equal("email", email)]
+  );
+  return result.total > 0 ? result.documents[0] : null;
+}
+
+export async function sendEmailOTP({ email }: { email: string }) {
+  const { account } = await createAdminClient();
+  try {
+    const session = await account.createEmailToken(ID.unique(), email);
+
+    return session.userId;
+  } catch (error) {
+    handleError(error, "Fail to send email OTP");
+  }
+}
 
 export async function createAccount({
   fullName,
@@ -34,11 +48,49 @@ export async function createAccount({
       {
         fullName,
         email,
-        avatar:
-          "https://img.freepik.com/premium-vector/profile-picture-placeholder-avatar-silhouette-gray-tones-icon-colored-shapes-gradient_1076610-40164.jpg",
+        avatar: avatarPlaceholderUrl,
         accountId,
       }
     );
   }
   return parseStringify({ accountId });
+}
+
+export async function verifySecret({
+  accountId,
+  password,
+}: {
+  accountId: string;
+  password: string;
+}) {
+  try {
+    const { account } = await createAdminClient();
+    const session = await account.createSession(accountId, password);
+
+    (await cookies()).set("appwrite-session", session.secret, {
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+    });
+
+    return parseStringify({ sessionId: session.$id });
+  } catch (error) {
+    handleError(error, "Failed to verify OTP");
+  }
+}
+
+export async function getCurrentUser() {
+  const { databases, account } = await createSessionClient();
+
+  const result = await account.get();
+  const user = await databases.listDocuments(
+    appwriteConfig.databaseId,
+    appwriteConfig.usersCollectionId,
+    [Query.equal("accountId", result.$id)]
+  );
+
+  if (user.total <= 0) return null;
+  console.log(user);
+  return parseStringify(user.documents[0]);
 }
