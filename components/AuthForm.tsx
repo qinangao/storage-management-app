@@ -134,18 +134,18 @@ function AuthForm({ type }: { type: FormType }) {
             <p className="text-light-100">
               {type === "sign-in"
                 ? "Dont't have an account?"
-                : "Aldready habe an account?"}
+                : "Already have an account?"}
             </p>
             <Link
               href={type === "sign-in" ? "/sign-up" : "/sign-in"}
               className="ml-1 font-medium text-brand"
             >
-              {type === "sign-in" ? "Sign Up" : "SignIn"}
+              {type === "sign-in" ? "Sign Up" : "Sign In"}
             </Link>
           </div>
         </form>
       </Form>
-      {true && (
+      {accountId && (
         <OTPModal email={form.getValues("email")} accountId={accountId} />
       )}
     </>
