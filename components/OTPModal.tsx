@@ -1,3 +1,4 @@
+"use client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,8 +17,11 @@ import {
 import Image from "next/image";
 import React, { useState } from "react";
 import { Button } from "./ui/button";
+import { sendEmailOTP, verifySecret } from "@/lib/actions/user.actions";
+import { useRouter } from "next/navigation";
 
 function OTPModal({ accountId, email }: { accountId: string; email: string }) {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
   const [password, setPassword] = useState("");
   const [isLoading, setIsloading] = useState(false);
@@ -27,14 +31,20 @@ function OTPModal({ accountId, email }: { accountId: string; email: string }) {
     setIsloading(true);
     try {
       // Call API to verify OTP
+      const sessionId = await verifySecret({ accountId, password });
+
+      if (sessionId) {
+        router.push("/");
+      }
     } catch (error) {
       console.log("Failed to verity OTP", error);
       setIsloading(false);
     }
   }
 
-  async function handleResetOtp() {
+  async function handleResendOtp() {
     // Call API to resent OTP
+    await sendEmailOTP({ email });
   }
 
   return (
@@ -93,7 +103,7 @@ function OTPModal({ accountId, email }: { accountId: string; email: string }) {
                 type="button"
                 variant="link"
                 className="pl-1 text-brand"
-                onClick={handleResetOtp}
+                onClick={handleResendOtp}
               >
                 Click to resend
               </Button>{" "}
