@@ -18,6 +18,7 @@ import { Button } from "./ui/button";
 import { signOutUser } from "@/lib/actions/user.actions";
 
 type MobileNavigationPropsType = {
+  $id: string;
   accountId: string;
   fullName: string;
   email: string;
@@ -25,6 +26,7 @@ type MobileNavigationPropsType = {
 };
 
 function MobileNavigation({
+  $id: ownerId,
   accountId,
   fullName,
   email,
@@ -98,7 +100,7 @@ function MobileNavigation({
             </nav>
             <Separator className="my-5 bg-light-200/20" />
             <div className="flex flex-col justify-center gap-5 pb-5">
-              <FileUploader />
+              <FileUploader ownerId={ownerId} accountId={accountId} />
               <Button
                 type="submit"
                 className="mobile-sign-out-button"
