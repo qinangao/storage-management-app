@@ -6,7 +6,7 @@ import { appwriteConfig } from "../config";
 import { parseStringify } from "../utils";
 import { cookies } from "next/headers";
 import { avatarPlaceholderUrl } from "../constants";
-import { handleError } from "../helper";
+import { getInitials, handleError } from "../helper";
 import { redirect } from "next/navigation";
 
 export async function getUserByEmail(email: string) {
@@ -17,6 +17,18 @@ export async function getUserByEmail(email: string) {
     [Query.equal("email", email)]
   );
   return result.total > 0 ? result.documents[0] : null;
+}
+
+export async function getRandomAvatarUrl(fullName: string) {
+  try {
+    // Construct the avatar URL directly
+    const initials = getInitials(fullName); // or generate random initials
+    const avatarUrl = `${appwriteConfig.endpointUrl}/avatars/initials?name=${initials}&width=100&height=100&background=FF5733`;
+
+    return avatarUrl;
+  } catch (error) {
+    handleError(error, "Cannot generate avatar URL");
+  }
 }
 
 export async function sendEmailOTP({ email }: { email: string }) {
@@ -45,6 +57,14 @@ export async function createAccount({
     });
   }
 
+  const avatar = await getRandomAvatarUrl(fullName);
+  if (!avatar) {
+    return parseStringify({
+      accountId: null,
+      error: "Failed to generate avatar. Please try again.",
+    });
+  }
+
   const accountId = await sendEmailOTP({ email });
 
   if (!accountId) throw new Error("Fail to send an OTP");
@@ -57,7 +77,7 @@ export async function createAccount({
     {
       fullName,
       email,
-      avatar: avatarPlaceholderUrl,
+      avatar: avatar || avatarPlaceholderUrl,
       accountId,
     }
   );
