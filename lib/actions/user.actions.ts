@@ -5,9 +5,9 @@ import { createAdminClient, createSessionClient } from "..";
 import { appwriteConfig } from "../config";
 import { parseStringify } from "../utils";
 import { cookies } from "next/headers";
-import { avatarPlaceholderUrl } from "../constants";
 import { getInitials, handleError } from "../helper";
 import { redirect } from "next/navigation";
+import { avatarPlaceholderUrl } from "@/constants";
 
 export async function getUserByEmail(email: string) {
   const { databases } = await createAdminClient();
