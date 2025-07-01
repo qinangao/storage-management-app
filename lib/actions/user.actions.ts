@@ -7,6 +7,7 @@ import { parseStringify } from "../utils";
 import { cookies } from "next/headers";
 import { avatarPlaceholderUrl } from "../constants";
 import { handleError } from "../helper";
+import { redirect } from "next/navigation";
 
 export async function getUserByEmail(email: string) {
   const { databases } = await createAdminClient();
@@ -91,6 +92,18 @@ export async function getCurrentUser() {
   );
 
   if (user.total <= 0) return null;
-  console.log(user);
+
   return parseStringify(user.documents[0]);
+}
+
+export async function signOutUser() {
+  const { account } = await createSessionClient();
+  try {
+    await account.deleteSession("current");
+    (await cookies()).delete("appwrite-session");
+  } catch (error) {
+    handleError(error, "Fail to sign out user");
+  } finally {
+    redirect("/sign-in");
+  }
 }
