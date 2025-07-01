@@ -20,7 +20,7 @@ async function layout({ children }: { children: React.ReactNode }) {
         avatar={currentUser.avatar}
       />
       <section className="flex-h-full flex-1 flex-col">
-        <MobileNavigation />
+        <MobileNavigation {...currentUser} />
         <Header />
         <div className="main-content">{children}</div>
       </section>
