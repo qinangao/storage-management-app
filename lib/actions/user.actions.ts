@@ -38,22 +38,30 @@ export async function createAccount({
   email: string;
 }) {
   const existingUser = await getUserByEmail(email);
-  const accountId = await sendEmailOTP({ email });
-  if (!accountId) throw new Error("Fail to dens an OTP");
-  if (!existingUser) {
-    const { databases } = await createAdminClient();
-    await databases.createDocument(
-      appwriteConfig.databaseId,
-      appwriteConfig.usersCollectionId,
-      ID.unique(),
-      {
-        fullName,
-        email,
-        avatar: avatarPlaceholderUrl,
-        accountId,
-      }
-    );
+  if (existingUser) {
+    return parseStringify({
+      accountId: null,
+      error: "You've already signed up. Please use Sign In to continue.",
+    });
   }
+
+  const accountId = await sendEmailOTP({ email });
+
+  if (!accountId) throw new Error("Fail to send an OTP");
+
+  const { databases } = await createAdminClient();
+  await databases.createDocument(
+    appwriteConfig.databaseId,
+    appwriteConfig.usersCollectionId,
+    ID.unique(),
+    {
+      fullName,
+      email,
+      avatar: avatarPlaceholderUrl,
+      accountId,
+    }
+  );
+
   return parseStringify({ accountId });
 }
 
@@ -105,5 +113,22 @@ export async function signOutUser() {
     handleError(error, "Fail to sign out user");
   } finally {
     redirect("/sign-in");
+  }
+}
+
+export async function signInUser({ email }: { email: string }) {
+  try {
+    const existingUser = await getUserByEmail(email);
+    // User exists,send OTP
+    if (existingUser) {
+      await sendEmailOTP({ email });
+      return parseStringify({ accountId: existingUser.accountId });
+    }
+    return parseStringify({
+      accountId: null,
+      error: "No account found. Please sign up to get started.",
+    });
+  } catch (error) {
+    handleError(error, "Fail to sign in user");
   }
 }
