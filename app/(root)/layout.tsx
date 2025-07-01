@@ -8,17 +8,12 @@ import React from "react";
 
 async function layout({ children }: { children: React.ReactNode }) {
   const currentUser = await getCurrentUser();
-  console.log(currentUser);
 
   if (!currentUser) return redirect("/sign-in");
 
   return (
     <main className="flex h-screen">
-      <Sidebar
-        fullName={currentUser.fullName}
-        email={currentUser.email}
-        avatar={currentUser.avatar}
-      />
+      <Sidebar {...currentUser} />
       <section className="flex-h-full flex-1 flex-col">
         <MobileNavigation {...currentUser} />
         <Header />
