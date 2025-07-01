@@ -7,12 +7,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 type SidebarPropsType = {
+  ownerId: string;
   fullName: string;
   email: string;
   avatar: string;
 };
 
-function Sidebar({ fullName, email, avatar }: SidebarPropsType) {
+function Sidebar({ ownerId, fullName, email, avatar }: SidebarPropsType) {
   const pathname = usePathname();
   return (
     <aside className="sidebar">
