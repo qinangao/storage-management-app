@@ -15,6 +15,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import FileUploader from "./FileUploader";
 import { Button } from "./ui/button";
+import { signOutUser } from "@/lib/actions/user.actions";
 
 type MobileNavigationPropsType = {
   accountId: string;
@@ -101,7 +102,7 @@ function MobileNavigation({
               <Button
                 type="submit"
                 className="mobile-sign-out-button"
-                onClick={() => {}}
+                onClick={async () => await signOutUser()}
               >
                 <Image
                   src="/assets/icons/logout.svg"
