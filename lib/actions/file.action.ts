@@ -1,6 +1,6 @@
 "use server";
 
-import { UploadFileProps } from "@/types";
+import { RenameFileProps, UploadFileProps } from "@/types";
 import { createAdminClient } from "..";
 import { handleError } from "../helper";
 import { InputFile } from "node-appwrite/file";
@@ -79,16 +79,38 @@ export async function getFiles() {
       throw new Error("User not found");
     }
     const queries = createQueries(currentUser);
-    console.log({ currentUser, queries });
 
     const files = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.filesCollectionId,
       queries
     );
-    console.log({ files });
+
     return parseStringify(files);
   } catch (error) {
     handleError(error, "Failed to get files");
+  }
+}
+export async function renameFile({
+  fileId,
+  name,
+  extension,
+  path,
+}: RenameFileProps) {
+  const { databases } = await createAdminClient();
+  try {
+    const newName = `${name}.${extension}`;
+    const updatedFile = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.filesCollectionId,
+      fileId,
+      {
+        name: newName,
+      }
+    ); // update the metadata in the database not the files in the storage
+    revalidatePath(path);
+    return parseStringify(updatedFile);
+  } catch (error) {
+    handleError(error, "Failed to rename file");
   }
 }
