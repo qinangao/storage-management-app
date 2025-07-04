@@ -1,6 +1,10 @@
 "use server";
 
-import { RenameFileProps, UploadFileProps } from "@/types";
+import {
+  RenameFileProps,
+  UpdateFileUsersProps,
+  UploadFileProps,
+} from "@/types";
 import { createAdminClient } from "..";
 import { handleError } from "../helper";
 import { InputFile } from "node-appwrite/file";
@@ -106,6 +110,28 @@ export async function renameFile({
       fileId,
       {
         name: newName,
+      }
+    ); // update the metadata in the database not the files in the storage
+    revalidatePath(path);
+    return parseStringify(updatedFile);
+  } catch (error) {
+    handleError(error, "Failed to rename file");
+  }
+}
+
+export async function updateFileUsers({
+  fileId,
+  emails,
+  path,
+}: UpdateFileUsersProps) {
+  const { databases } = await createAdminClient();
+  try {
+    const updatedFile = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.filesCollectionId,
+      fileId,
+      {
+        users: emails,
       }
     ); // update the metadata in the database not the files in the storage
     revalidatePath(path);
