@@ -24,7 +24,7 @@ import { Models } from "node-appwrite";
 import { useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { renameFile } from "@/lib/actions/file.action";
+import { renameFile, updateFileUsers } from "@/lib/actions/file.action";
 import { usePathname } from "next/navigation";
 import { FileDetails, ShareInput } from "./ActionModalContent";
 
@@ -54,8 +54,8 @@ function ActionDropdown({ file }: { file: Models.Document }) {
     const actions = {
       rename: () =>
         renameFile({ fileId: file.$id, name, extension: file.extension, path }),
-      share: () => console.log("Share"),
-      delete: () => console.log("Delete"),
+      share: () => updateFileUsers({ fileId: file.$id, emails, path }),
+      delete: () => console.log("delete"),
     };
     success = await actions[action.value as keyof typeof actions]();
 
@@ -65,7 +65,16 @@ function ActionDropdown({ file }: { file: Models.Document }) {
     setIsLoading(false);
   }
   // Remove the user from share functionality
-  function handleRemoveUser() {}
+  async function handleRemoveUser(email: string) {
+    const updatedEmails = emails.filter((e) => e !== email);
+    const success = await updateFileUsers({
+      fileId: file.$id,
+      emails: updatedEmails,
+      path,
+    });
+    if (success) setEmails(updatedEmails);
+    closeAllModals();
+  }
 
   function renderDialogContent() {
     if (!action) return null;
