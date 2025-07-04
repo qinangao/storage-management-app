@@ -3,11 +3,9 @@
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -28,7 +26,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { renameFile } from "@/lib/actions/file.action";
 import { usePathname } from "next/navigation";
-import { FileDetails } from "./ActionModalContent";
+import { FileDetails, ShareInput } from "./ActionModalContent";
 
 function ActionDropdown({ file }: { file: Models.Document }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,7 +34,9 @@ function ActionDropdown({ file }: { file: Models.Document }) {
   const [action, setAction] = useState<ActionType | null>(null);
   const [name, setName] = useState(file.name);
   const [isLoading, setIsLoading] = useState(false);
+
   const path = usePathname();
+  const [emails, setEmails] = useState<string[]>([]);
 
   function closeAllModals() {
     setIsModalOpen(false);
@@ -64,6 +64,8 @@ function ActionDropdown({ file }: { file: Models.Document }) {
     }
     setIsLoading(false);
   }
+  // Remove the user from share functionality
+  function handleRemoveUser() {}
 
   function renderDialogContent() {
     if (!action) return null;
@@ -82,6 +84,13 @@ function ActionDropdown({ file }: { file: Models.Document }) {
             />
           )}
           {value === "details" && <FileDetails file={file} />}
+          {value === "share" && (
+            <ShareInput
+              file={file}
+              onInputChange={setEmails}
+              onRemove={handleRemoveUser}
+            />
+          )}
         </DialogHeader>
         {["rename", "delete", "share"].includes(value) && (
           <DialogFooter className="flex flex-col gap-3 md:flex-row">
