@@ -4,8 +4,11 @@ import Thumbnail from "./Thumbnail";
 import { convertFileSize } from "@/lib/utils";
 import FormattedDateTime from "./FormattedDateTime";
 import ActionDropdown from "./ActionDropdown";
+import { getCurrentUser } from "@/lib/actions/user.actions";
 
-function Card({ file }: { file: Models.Document }) {
+async function Card({ file }: { file: Models.Document }) {
+  const currentUser = await getCurrentUser();
+
   return (
     <Link href={file.url} target="_blank" className="file-card">
       <div className="flex justify-between">
@@ -17,7 +20,7 @@ function Card({ file }: { file: Models.Document }) {
           imageClassName="!size-11"
         />
         <div className="flex flex-col items-end justify-between">
-          <ActionDropdown file={file} />
+          <ActionDropdown file={file} currentUserId={currentUser.$id} />
           <p className="body-1">{convertFileSize(file.size)}</p>
         </div>
       </div>

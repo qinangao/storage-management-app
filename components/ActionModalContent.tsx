@@ -51,13 +51,17 @@ export type ShareInputPropsType = {
   file: Models.Document;
   onInputChange: React.Dispatch<React.SetStateAction<string[]>>;
   onRemove: (email: string) => void;
+  currentUserId: string;
 };
 
 export function ShareInput({
   file,
   onInputChange,
   onRemove,
+  currentUserId,
 }: ShareInputPropsType) {
+  const isOwnerOfTheFile = currentUserId === file.owner.$id;
+
   return (
     <>
       <ImageThumbnail file={file} />
@@ -85,18 +89,20 @@ export function ShareInput({
                 className="flex items-center justify-between gap-2"
               >
                 <p className="subtitle-2">{email}</p>
-                <Button
-                  onClick={() => onRemove(email)}
-                  className="share-remove-user"
-                >
-                  <Image
-                    src="/assets/icons/remove.svg"
-                    alt="remove"
-                    width={24}
-                    height={24}
-                    className="remove-icon"
-                  />
-                </Button>
+                {isOwnerOfTheFile && (
+                  <Button
+                    onClick={() => onRemove(email)}
+                    className="share-remove-user"
+                  >
+                    <Image
+                      src="/assets/icons/remove.svg"
+                      alt="remove"
+                      width={24}
+                      height={24}
+                      className="remove-icon"
+                    />
+                  </Button>
+                )}
               </li>
             ))}
           </ul>

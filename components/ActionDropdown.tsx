@@ -28,7 +28,13 @@ import { renameFile, updateFileUsers } from "@/lib/actions/file.action";
 import { usePathname } from "next/navigation";
 import { FileDetails, ShareInput } from "./ActionModalContent";
 
-function ActionDropdown({ file }: { file: Models.Document }) {
+function ActionDropdown({
+  file,
+  currentUserId,
+}: {
+  file: Models.Document;
+  currentUserId: string;
+}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [action, setAction] = useState<ActionType | null>(null);
@@ -98,6 +104,7 @@ function ActionDropdown({ file }: { file: Models.Document }) {
               file={file}
               onInputChange={setEmails}
               onRemove={handleRemoveUser}
+              currentUserId={currentUserId}
             />
           )}
         </DialogHeader>
