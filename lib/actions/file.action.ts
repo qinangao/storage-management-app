@@ -2,6 +2,7 @@
 
 import {
   DeleteFileProps,
+  GetFilesProps,
   RenameFileProps,
   UpdateFileUsersProps,
   UploadFileProps,
@@ -64,7 +65,13 @@ export async function uploadFile({
   }
 }
 
-function createQueries(currentUser: Models.Document) {
+function createQueries(
+  currentUser: Models.Document,
+  types: string[],
+  searchText: string,
+  sort: string,
+  limit?: number
+) {
   const queries = [
     Query.or([
       Query.equal("owner", [currentUser.$id]),
@@ -72,18 +79,33 @@ function createQueries(currentUser: Models.Document) {
     ]),
   ];
 
-  // TODO: Search, Sort,Limit...
+  if (types.length > 0) queries.push(Query.equal("type", types));
+  if (searchText) queries.push(Query.contains("name", searchText));
+  if (limit) queries.push(Query.limit(limit));
+
+  if (sort) {
+    const [sortBy, orderBy] = sort.split("-");
+    queries.push(
+      orderBy === "asc" ? Query.orderAsc(sortBy) : Query.orderDesc(sortBy)
+    );
+  }
   return queries;
 }
 
-export async function getFiles() {
+export async function getFiles({
+  types = [],
+  searchText = "",
+  sort = "$createAt-desc",
+  limit,
+}: GetFilesProps) {
   const { databases } = await createAdminClient();
   try {
     const currentUser = await getCurrentUser();
+
     if (!currentUser) {
       throw new Error("User not found");
     }
-    const queries = createQueries(currentUser);
+    const queries = createQueries(currentUser, types, searchText, sort, limit);
 
     const files = await databases.listDocuments(
       appwriteConfig.databaseId,
@@ -96,6 +118,7 @@ export async function getFiles() {
     handleError(error, "Failed to get files");
   }
 }
+
 export async function renameFile({
   fileId,
   name,
