@@ -95,8 +95,9 @@ function FileUploader({
                     url={convertFileToUrl(file)}
                   />
 
-                  <div className="preview-item-name">
+                  <div className="preview-item-name max-w-[200px] truncate">
                     {file.name}
+
                     <Image
                       src="/assets/icons/file-loader.gif"
                       width={80}
