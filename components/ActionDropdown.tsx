@@ -24,7 +24,11 @@ import { Models } from "node-appwrite";
 import { useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { renameFile, updateFileUsers } from "@/lib/actions/file.action";
+import {
+  deleteFile,
+  renameFile,
+  updateFileUsers,
+} from "@/lib/actions/file.action";
 import { usePathname } from "next/navigation";
 import { FileDetails, ShareInput } from "./ActionModalContent";
 
@@ -61,7 +65,8 @@ function ActionDropdown({
       rename: () =>
         renameFile({ fileId: file.$id, name, extension: file.extension, path }),
       share: () => updateFileUsers({ fileId: file.$id, emails, path }),
-      delete: () => console.log("delete"),
+      delete: () =>
+        deleteFile({ fileId: file.$id, bucketFileId: file.bucketFileId, path }),
     };
     success = await actions[action.value as keyof typeof actions]();
 
@@ -106,6 +111,12 @@ function ActionDropdown({
               onRemove={handleRemoveUser}
               currentUserId={currentUserId}
             />
+          )}
+          {value === "delete" && (
+            <p className="delete-confirmation">
+              Are you sure you want to delete {``}
+              <span className="delete-file-name">{file.name}</span>?
+            </p>
           )}
         </DialogHeader>
         {["rename", "delete", "share"].includes(value) && (
