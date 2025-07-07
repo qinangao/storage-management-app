@@ -34,7 +34,7 @@ function Search() {
     }
 
     fetchFiles();
-  }, [debouncedQuery, router, path, searchParams]);
+  }, [debouncedQuery]);
 
   useEffect(() => {
     if (!searchQuery) {
