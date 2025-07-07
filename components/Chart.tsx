@@ -46,7 +46,7 @@ export default function Chart({ used }: { used: number }) {
             startAngle={90}
             endAngle={percentage * 3.6 + 90}
             innerRadius={80}
-            outerRadius={110}
+            outerRadius={95}
           >
             <PolarGrid
               gridType="circle"
