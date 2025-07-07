@@ -5,7 +5,6 @@ import Thumbnail from "@/components/Thumbnail";
 import { Separator } from "@/components/ui/separator";
 import { getFiles, getTotalSpaceUsed } from "@/lib/actions/file.action";
 import { convertFileSize, getUsageSummary } from "@/lib/utils";
-
 import Image from "next/image";
 import Link from "next/link";
 import { Models } from "node-appwrite";
@@ -15,7 +14,6 @@ export default async function Dashborad() {
   const totalSpace = await getTotalSpaceUsed();
   // Get usage summary for each file type
   const usageSummary = getUsageSummary(totalSpace);
-  console.log(usageSummary);
 
   return (
     <div className="dashboard-container">
