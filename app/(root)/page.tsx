@@ -2,18 +2,58 @@ import ActionDropdown from "@/components/ActionDropdown";
 import Chart from "@/components/Chart";
 import FormattedDateTime from "@/components/FormattedDateTime";
 import Thumbnail from "@/components/Thumbnail";
-import { getFiles } from "@/lib/actions/file.action";
+import { Separator } from "@/components/ui/separator";
+import { getFiles, getTotalSpaceUsed } from "@/lib/actions/file.action";
+import { convertFileSize, getUsageSummary } from "@/lib/utils";
+
+import Image from "next/image";
 import Link from "next/link";
 import { Models } from "node-appwrite";
 
 export default async function Dashborad() {
   const files = await getFiles({ types: [], limit: 10 });
+  const totalSpace = await getTotalSpaceUsed();
+  // Get usage summary for each file type
+  const usageSummary = getUsageSummary(totalSpace);
+  console.log(usageSummary);
 
   return (
     <div className="dashboard-container">
       <section>
-        <Chart />
-        <ul className="dashboard-summary-list"></ul>
+        <Chart used={totalSpace.used} />
+        <ul className="dashboard-summary-list">
+          {usageSummary.map((summary) => (
+            <Link
+              href={summary.url}
+              key={summary.title}
+              className="dashboard-summary-card"
+            >
+              <div className="space-y-4">
+                <div className="flex justify-between gap-3">
+                  <Image
+                    src={summary.icon}
+                    alt="uploaded image"
+                    width={100}
+                    height={100}
+                    className="summary-type-icon"
+                  />
+                  <h4 className="summary-type-size">
+                    {convertFileSize(summary.size) || 0}
+                  </h4>
+                </div>
+                <h5 className="summary-type-title">{summary.title}</h5>
+                <Separator className="bg-light-400" />
+                <p className="subtitle-2 text-center text-light-200">
+                  Last update
+                </p>
+                <FormattedDateTime
+                  date={summary.latestDate}
+                  className="text-center"
+                />
+              </div>
+            </Link>
+          ))}
+        </ul>
       </section>
 
       <section className="dashboard-recent-files">
@@ -50,7 +90,7 @@ export default async function Dashborad() {
             ))}
           </ul>
         ) : (
-          <p className="empty-list">No files found</p>
+          <p className="empty-list">No files uploaded</p>
         )}
       </section>
     </div>
