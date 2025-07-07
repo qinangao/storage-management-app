@@ -21,7 +21,7 @@ import { ActionType } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import { Models } from "node-appwrite";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import {
@@ -39,23 +39,38 @@ function ActionDropdown({
   file: Models.Document;
   currentUserId?: string;
 }) {
+  const getCurrentNameWithoutExtension = useCallback(() => {
+    return file.name.replace(new RegExp(`\\.${file.extension}$`), "");
+  }, [file.name, file.extension]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [action, setAction] = useState<ActionType | null>(null);
-  const [name, setName] = useState(file.name);
   const [isLoading, setIsLoading] = useState(false);
+  const [name, setName] = useState(() => getCurrentNameWithoutExtension());
+  const [emails, setEmails] = useState<string[]>([]);
 
   const path = usePathname();
-  const [emails, setEmails] = useState<string[]>([]);
+
+  useEffect(() => {
+    setName(getCurrentNameWithoutExtension());
+  }, [getCurrentNameWithoutExtension]);
 
   function closeAllModals() {
     setIsModalOpen(false);
     setIsDropdownOpen(false);
     setAction(null);
-    setName(file.name);
+    setName(getCurrentNameWithoutExtension());
+
     setIsLoading(false);
-    // setEmail([]);
+    setEmails([]);
   }
+
+  useEffect(() => {
+    if (isModalOpen && action?.value === "rename") {
+      setName(getCurrentNameWithoutExtension());
+    }
+  }, [isModalOpen, action, getCurrentNameWithoutExtension]);
 
   async function handleAction() {
     if (!action) return;
@@ -125,7 +140,7 @@ function ActionDropdown({
               Cancel
             </Button>
             <Button onClick={handleAction} className="modal-submit-button">
-              <p className="capitialize">{value}</p>
+              <p className="capitalize">{value}</p>
               {isLoading && (
                 <Image
                   src="/assets/icons/loader.svg"
