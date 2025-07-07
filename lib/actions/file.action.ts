@@ -95,7 +95,7 @@ function createQueries(
 export async function getFiles({
   types = [],
   searchText = "",
-  sort = "$createAt-desc",
+  sort = "$createdAt-desc",
   limit,
 }: GetFilesProps) {
   const { databases } = await createAdminClient();
