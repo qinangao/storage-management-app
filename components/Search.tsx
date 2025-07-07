@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { Input } from "./ui/input";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getFiles } from "@/lib/actions/file.action";
 import { Models } from "node-appwrite";
@@ -19,6 +19,28 @@ function Search() {
   const router = useRouter();
   const path = usePathname();
   const [debouncedQuery] = useDebounce(query, 300);
+
+  const searchRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setQuery("");
+  }, [path]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (searchRef.current && !searchRef.current?.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [open]);
 
   useEffect(() => {
     async function fetchFiles() {
@@ -45,6 +67,7 @@ function Search() {
   function handleClickItem(file: Models.Document) {
     setOpen(false);
     setResults([]);
+
     router.push(
       `/${
         file.type === "video" || file.type === "audio"
@@ -55,7 +78,7 @@ function Search() {
   }
 
   return (
-    <div className="search">
+    <div className="search" ref={searchRef}>
       <div className="search-input-wrapper">
         <Image
           src="/assets/icons/search.svg"
@@ -64,6 +87,7 @@ function Search() {
           height={24}
         />
         <Input
+          ref={inputRef}
           value={query}
           placeholder="Search..."
           className="search-input"
