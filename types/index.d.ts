@@ -11,6 +11,9 @@ export interface ActionType {
   value: string;
 }
 
+export interface SegmentParams {
+  [key: string]: string;
+}
 export interface SearchParamProps {
   params?: Promise<SegmentParams>;
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
