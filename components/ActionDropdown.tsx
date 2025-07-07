@@ -37,7 +37,7 @@ function ActionDropdown({
   currentUserId,
 }: {
   file: Models.Document;
-  currentUserId: string;
+  currentUserId?: string;
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

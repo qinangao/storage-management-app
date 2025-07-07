@@ -51,7 +51,7 @@ export type ShareInputPropsType = {
   file: Models.Document;
   onInputChange: React.Dispatch<React.SetStateAction<string[]>>;
   onRemove: (email: string) => void;
-  currentUserId: string;
+  currentUserId?: string;
 };
 
 export function ShareInput({
